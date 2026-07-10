@@ -1,0 +1,6 @@
+hw/**/*backups*/*
+hw/**/production/*
+hw/**/fabrication-toolkit-options.json
+hw/**/fp-info-cache
+hw/**/fp-lib-table
+hw/**/sym-lib-table
