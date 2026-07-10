@@ -10,7 +10,7 @@ The unofficial badge of PDX Hackerspace.
 
 Though we've specced this for a Xiao ESP32-S3, this should work with any Xiao board with a compatible pinout. If the board doesn't support LiPO battery charging then obviously it will only work when plugged into USB.
 
-![front](docs/images/front-0.1.0.jpg) ![back](docs/images/back-0.1.0.jpg)
+![front](doc/images/front-0.1.0.jpg) ![back](doc/images/back-0.1.0.jpg)
 
 ## LED power
 
