@@ -1,5 +1,7 @@
 # PDX Hackerspace Hackerbadge
 
+[![CI](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/ci.yml/badge.svg)](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/ci.yml)
+
 The unofficial badge of PDX Hackerspace.
 
 - 37 WS2812B addressable RGB LEDs

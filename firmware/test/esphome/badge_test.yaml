@@ -38,6 +38,12 @@ esp32:
   framework:
     type: arduino
 
+packages:
+  wifi-diagnostics: github://romkey/esphome-lib/lib/wifi-diagnostics.yml@main
+  esp32-diagnostics: github://romkey/esphome-lib/lib/esp32.yml@main
+  i2c-scan: github://romkey/esphome-lib/lib/i2c-scan.yml@main
+  restart: github://romkey/esphome-lib/lib/restart.yml@main
+
 logger:
   level: INFO
 
@@ -46,6 +52,8 @@ wifi:
   ap:
     ssid: "Hackerbadge-Test"
     password: "hackerspace"
+
+api:
 
 captive_portal:
 

@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  esphome:
+    name: ESPHome test firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile badge_test.yaml
+        working-directory: firmware/test/esphome
+        run: docker compose run --rm esphome compile badge_test.yaml
+
+  arduino:
+    name: Arduino test firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile badge_test sketch
+        working-directory: firmware/test/arduino
+        run: docker compose run --rm build compile
