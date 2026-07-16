@@ -66,3 +66,19 @@ jobs:
           if [ -d firmware/test/arduino/cache ]; then
             sudo chown -R "$(id -u):$(id -g)" firmware/test/arduino/cache
           fi
+
+  circuitpython:
+    name: CircuitPython test firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check with CPython
+        run: python3 -m py_compile firmware/test/circuitpython/code.py
+
+      # mpy-cross is the MicroPython bytecode cross-compiler; this catches
+      # anything CircuitPython's compiler would reject, not just CPython syntax.
+      - name: Compile with mpy-cross
+        run: |
+          pip install mpy-cross
+          mpy-cross -o /tmp/code.mpy firmware/test/circuitpython/code.py
