@@ -1,6 +1,8 @@
 # PDX Hackerspace Hackerbadge
 
-[![CI](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/ci.yml/badge.svg)](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/ci.yml)
+[![ESPHome](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/esphome.yml/badge.svg)](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/esphome.yml)
+[![Arduino](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/arduino.yml/badge.svg)](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/arduino.yml)
+[![CircuitPython](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/circuitpython.yml/badge.svg)](https://github.com/pdxhackerspace/hackerbadge/actions/workflows/circuitpython.yml)
 
 The unofficial badge of PDX Hackerspace.
 

@@ -1,0 +1,7 @@
+# CI override: replace the named arduino-cli data volume with a host bind
+# mount so GitHub Actions can persist the ESP32 core and libraries between runs.
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm build compile
+services:
+  build:
+    volumes:
+      - ./cache:/data

@@ -1,0 +1,46 @@
+name: ESPHome
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "firmware/test/esphome/**"
+      - ".github/workflows/esphome.yml"
+  pull_request:
+    paths:
+      - "firmware/test/esphome/**"
+      - ".github/workflows/esphome.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ESPHome test firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Persists PlatformIO toolchains/platforms (ESP-IDF, ESP32 core) and the
+      # ESPHome build dir (compiled objects) across runs.
+      - name: Cache PlatformIO downloads and build dir
+        uses: actions/cache@v4
+        with:
+          path: |
+            firmware/test/esphome/cache
+            firmware/test/esphome/.esphome
+          key: esphome-${{ hashFiles('firmware/test/esphome/badge_test.yaml', 'firmware/test/esphome/docker-compose*.yml') }}
+          restore-keys: |
+            esphome-
+
+      - name: Compile badge_test.yaml
+        working-directory: firmware/test/esphome
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm esphome compile badge_test.yaml
+
+      # The container runs as root; make the cache readable so the post-job
+      # cache save step can tar it.
+      - name: Fix cache permissions
+        if: always()
+        run: |
+          for d in firmware/test/esphome/cache firmware/test/esphome/.esphome; do
+            [ -d "$d" ] && sudo chown -R "$(id -u):$(id -g)" "$d"
+          done
+          true

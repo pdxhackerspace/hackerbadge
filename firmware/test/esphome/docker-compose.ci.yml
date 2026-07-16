@@ -1,0 +1,7 @@
+# CI override: replace the named cache volume with a host bind mount so
+# GitHub Actions can persist PlatformIO toolchains/platforms between runs.
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm esphome compile badge_test.yaml
+services:
+  esphome:
+    volumes:
+      - ./cache:/cache
