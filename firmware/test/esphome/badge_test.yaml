@@ -62,6 +62,7 @@ web_server:
 
 # --- I2C: Qwiic/STEMMA QT + onboard LSM6DSO ---
 i2c:
+  id: i2c0  # required by the i2c-scan package
   sda: GPIO2  # D1
   scl: GPIO1  # D0
   scan: true
