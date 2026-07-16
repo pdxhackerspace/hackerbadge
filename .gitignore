@@ -13,3 +13,7 @@ firmware/test/esphome/secrets.yaml
 firmware/test/esphome/.esphome/
 firmware/test/arduino/build/
 firmware/wled/build/
+
+# CI bind-mounted caches (docker-compose.ci.yml)
+firmware/test/esphome/cache/
+firmware/test/arduino/cache/
