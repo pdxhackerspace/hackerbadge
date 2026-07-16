@@ -1,0 +1,33 @@
+# ESPHome dashboard + CLI for the Hackerbadge test firmware.
+#
+# Bring up the dashboard (edit/compile/flash from the browser):
+#   docker compose up
+#   open http://localhost:6052
+#
+# Compile from the CLI (no dashboard):
+#   docker compose run --rm esphome compile badge_test.yaml
+#
+# Compile and flash over USB (Linux; set DEVICE to your serial port):
+#   DEVICE=/dev/ttyACM0 docker compose run --rm --device=${DEVICE} esphome run badge_test.yaml
+#
+# On macOS, host networking is unavailable; the published 6052 port is used instead.
+
+services:
+  esphome:
+    image: ghcr.io/esphome/esphome:stable
+    container_name: hackerbadge-esphome
+    volumes:
+      - .:/config
+      - esphome-cache:/cache
+    environment:
+      ESPHOME_DASHBOARD_USE_PING: "true"
+      PLATFORMIO_CORE_DIR: /cache/platformio
+      PLATFORMIO_GLOBALLIB_DIR: /cache/platformio-lib
+    ports:
+      - "6052:6052"
+    # Uncomment on Linux if you prefer host networking for mDNS discovery:
+    # network_mode: host
+    restart: unless-stopped
+
+volumes:
+  esphome-cache:

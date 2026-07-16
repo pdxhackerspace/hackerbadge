@@ -4,3 +4,12 @@ hw/**/fabrication-toolkit-options.json
 hw/**/fp-info-cache
 hw/**/fp-lib-table
 hw/**/sym-lib-table
+hw/**/*.lck
+
+firmware/test/esphome/secrets.yml
+firmware/test/esphome/secrets.yaml
+
+# Firmware build artifacts
+firmware/test/esphome/.esphome/
+firmware/test/arduino/build/
+firmware/wled/build/

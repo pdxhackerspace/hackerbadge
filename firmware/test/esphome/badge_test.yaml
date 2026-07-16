@@ -1,0 +1,263 @@
+# PDX Hackerspace Hackerbadge — ESPHome hardware test
+#
+# Exercises the 37 WS2812B LEDs (colors + patterns) and the LSM6DSO IMU.
+#
+# Pinout (Seeed Xiao ESP32-S3):
+#   LED data  D10 = GPIO9
+#   I2C SDA   D1  = GPIO2
+#   I2C SCL   D0  = GPIO1
+#   LSM6DSO   0x6A
+#
+# Flash:
+#   esphome run firmware/test/esphome/badge_test.yaml
+#
+# After boot the badge cycles solid colors and addressable patterns. Serial
+# logs print accel/gyro samples; join Wi‑Fi AP "Hackerbadge-Test" (password
+# hackerspace) and open http://192.168.4.1/ for live sensor values.
+#
+# Requires ESPHome with the motion/lsm6ds platform (LSM6DSO support).
+
+substitutions:
+  name: hackerbadge-test
+  friendly_name: Hackerbadge Test
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "Hackerbadge test starting — LED pattern loop + IMU"
+      - light.turn_on:
+          id: badge_leds
+          brightness: 40%
+          effect: Solid Red
+
+esp32:
+  board: seeed_xiao_esp32s3
+  framework:
+    type: arduino
+
+logger:
+  level: INFO
+
+# Standalone test AP — no Home Assistant / secrets required
+wifi:
+  ap:
+    ssid: "Hackerbadge-Test"
+    password: "hackerspace"
+
+captive_portal:
+
+web_server:
+  port: 80
+
+# --- I2C: Qwiic/STEMMA QT + onboard LSM6DSO ---
+i2c:
+  sda: GPIO2  # D1
+  scl: GPIO1  # D0
+  scan: true
+  frequency: 400kHz
+
+motion:
+  - platform: lsm6ds
+    id: badge_imu
+    address: 0x6A
+    accelerometer_range: 4G
+    gyroscope_range: 2000DPS
+    update_interval: 100ms
+
+sensor:
+  - platform: motion
+    type: acceleration_x
+    name: "Accel X"
+    id: accel_x
+  - platform: motion
+    type: acceleration_y
+    name: "Accel Y"
+    id: accel_y
+  - platform: motion
+    type: acceleration_z
+    name: "Accel Z"
+    id: accel_z
+  - platform: motion
+    type: gyroscope_x
+    name: "Gyro X"
+    id: gyro_x
+  - platform: motion
+    type: gyroscope_y
+    name: "Gyro Y"
+    id: gyro_y
+  - platform: motion
+    type: gyroscope_z
+    name: "Gyro Z"
+    id: gyro_z
+  - platform: motion
+    type: pitch
+    name: "Pitch"
+    id: pitch
+  - platform: motion
+    type: roll
+    name: "Roll"
+    id: roll
+
+# --- 37 WS2812B on D10 ---
+light:
+  - platform: esp32_rmt_led_strip
+    id: badge_leds
+    name: "Badge LEDs"
+    pin: GPIO9  # D10
+    num_leds: 37
+    chipset: ws2812
+    rgb_order: GRB
+    default_transition_length: 0s
+    effects:
+      - addressable_lambda:
+          name: Solid Red
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(255, 0, 0);
+      - addressable_lambda:
+          name: Solid Green
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(0, 255, 0);
+      - addressable_lambda:
+          name: Solid Blue
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(0, 0, 255);
+      - addressable_lambda:
+          name: Solid White
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(255, 255, 255);
+      - addressable_lambda:
+          name: Solid Cyan
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(0, 255, 255);
+      - addressable_lambda:
+          name: Solid Magenta
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(255, 0, 255);
+      - addressable_lambda:
+          name: Solid Yellow
+          update_interval: 500ms
+          lambda: |-
+            it.all() = Color(255, 255, 0);
+      - addressable_rainbow:
+          name: Rainbow
+          speed: 20
+          width: 37
+      - addressable_color_wipe:
+          name: Color Wipe
+          colors:
+            - red: 100%
+              green: 0%
+              blue: 0%
+              num_leds: 8
+            - red: 0%
+              green: 100%
+              blue: 0%
+              num_leds: 8
+            - red: 0%
+              green: 0%
+              blue: 100%
+              num_leds: 8
+            - red: 100%
+              green: 100%
+              blue: 100%
+              num_leds: 8
+          add_led_interval: 40ms
+      - addressable_scan:
+          name: Scan
+          move_interval: 40ms
+          scan_width: 3
+      - addressable_twinkle:
+          name: Twinkle
+          twinkle_probability: 8%
+          progress_interval: 16ms
+      - addressable_random_twinkle:
+          name: Random Twinkle
+          twinkle_probability: 8%
+          progress_interval: 32ms
+      - addressable_fireworks:
+          name: Fireworks
+          update_interval: 32ms
+          spark_probability: 12%
+          use_random_color: true
+          fade_out_rate: 120
+      # Visual IMU check: LED color tracks pitch/roll; a bright dot follows tilt.
+      - addressable_lambda:
+          name: Accel Tilt
+          update_interval: 40ms
+          lambda: |-
+            float p = id(pitch).has_state() ? id(pitch).state : 0.0f;
+            float r = id(roll).has_state() ? id(roll).state : 0.0f;
+            // Map roughly ±45° into 0..1
+            float pr = (p + 45.0f) / 90.0f;
+            float rr = (r + 45.0f) / 90.0f;
+            if (pr < 0.0f) pr = 0.0f;
+            if (pr > 1.0f) pr = 1.0f;
+            if (rr < 0.0f) rr = 0.0f;
+            if (rr > 1.0f) rr = 1.0f;
+            uint8_t red = (uint8_t)(pr * 255.0f);
+            uint8_t green = (uint8_t)(rr * 255.0f);
+            float mid = pr - 0.5f;
+            if (mid < 0.0f) mid = -mid;
+            uint8_t blue = (uint8_t)((1.0f - mid * 2.0f) * 80.0f);
+            it.all() = Color(red / 4, green / 4, blue / 4);
+            int idx = (int)(rr * (it.size() - 1));
+            it[idx] = Color(red, green, 255);
+
+globals:
+  - id: effect_index
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+# Cycle colors and patterns; Accel Tilt is the IMU visual check in the loop.
+interval:
+  - interval: 8s
+    then:
+      - lambda: |-
+          static const char *const effects[] = {
+              "Solid Red",
+              "Solid Green",
+              "Solid Blue",
+              "Solid White",
+              "Solid Cyan",
+              "Solid Magenta",
+              "Solid Yellow",
+              "Rainbow",
+              "Color Wipe",
+              "Scan",
+              "Twinkle",
+              "Random Twinkle",
+              "Fireworks",
+              "Accel Tilt",
+          };
+          static const size_t n = sizeof(effects) / sizeof(effects[0]);
+          id(effect_index) = (id(effect_index) + 1) % n;
+          const char *name = effects[id(effect_index)];
+          auto call = id(badge_leds).turn_on();
+          call.set_brightness(0.4f);
+          call.set_effect(name);
+          call.perform();
+          ESP_LOGI("badge_test", "LED effect -> %s", name);
+
+  - interval: 2s
+    then:
+      - lambda: |-
+          if (!id(accel_x).has_state()) {
+            ESP_LOGW("badge_test", "IMU: no accelerometer data yet (check I2C 0x6A)");
+            return;
+          }
+          ESP_LOGI("badge_test",
+                   "IMU accel g=(%.2f, %.2f, %.2f) gyro dps=(%.1f, %.1f, %.1f) "
+                   "pitch=%.1f roll=%.1f",
+                   id(accel_x).state, id(accel_y).state, id(accel_z).state,
+                   id(gyro_x).state, id(gyro_y).state, id(gyro_z).state,
+                   id(pitch).state, id(roll).state);

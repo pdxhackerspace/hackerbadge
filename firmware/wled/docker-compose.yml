@@ -1,0 +1,33 @@
+# Build WLED for the Hackerbadge (Seeed Xiao ESP32-S3, 8MB flash + OPI PSRAM).
+#
+# Compile (binaries in ./build):
+#   docker compose run --rm build
+#
+# QSPI PSRAM fallback if the OPI build won't boot:
+#   PIO_ENV=hackerbadge_qspi docker compose run --rm build
+#
+# Upload over USB (Linux example):
+#   DEVICE=/dev/ttyACM0 docker compose run --rm --device=${DEVICE} build upload
+#
+# Pin a different WLED release:
+#   WLED_VERSION=v16.0.1 docker compose run --rm build
+
+services:
+  build:
+    build:
+      context: .
+      args:
+        WLED_VERSION: ${WLED_VERSION:-v16.0.1}
+    volumes:
+      - ./platformio_override.ini:/override/platformio_override.ini:ro
+      - ./build:/build
+      - wled-src:/wled
+      - wled-cache:/cache
+    environment:
+      WLED_VERSION: ${WLED_VERSION:-v16.0.1}
+      PIO_ENV: ${PIO_ENV:-hackerbadge}
+      PORT: ${PORT:-${DEVICE:-}}
+
+volumes:
+  wled-src:
+  wled-cache:

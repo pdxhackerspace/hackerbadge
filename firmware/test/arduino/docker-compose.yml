@@ -1,0 +1,26 @@
+# Build the Hackerbadge Arduino / FastLED test firmware with Arduino CLI.
+#
+# Compile (artifacts written to ./build):
+#   docker compose run --rm build
+#
+# Upload over USB (Linux example):
+#   DEVICE=/dev/ttyACM0 docker compose run --rm --device=${DEVICE} build upload
+#
+# Interactive Arduino CLI shell:
+#   docker compose run --rm build shell
+
+services:
+  build:
+    build: .
+    volumes:
+      - ./badge_test:/sketch/badge_test:ro
+      - ./build:/build
+      - arduino-cli-data:/data
+    environment:
+      SKETCH_DIR: /sketch/badge_test
+      FQBN: esp32:esp32:XIAO_ESP32S3:PSRAM=opi,FlashMode=qio,FlashSize=8M
+      # Override when uploading, e.g. PORT=/dev/ttyACM0
+      PORT: ${PORT:-${DEVICE:-}}
+
+volumes:
+  arduino-cli-data:
